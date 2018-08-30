@@ -51,6 +51,34 @@ def 	calcMedian(X):
 			res[i] = X[pos][i]
 	return (res)
 
+def calcLastQuirtile(X):
+	res = np.empty(X.shape[1], dtype=float)
+	pos = X.shape[0] / 2
+
+	# vital part of searching median is sorting beforehand
+	X.sort(axis=0)
+	for i in xrange(0, X.shape[1]):
+		pos = (3.0 / 4.0) * (X.shape[0] + 1)
+		if not (pos.is_integer()):
+			res[i] = (X[int(pos) - 1][i] + X[int(pos) + 1][i]) / 2 
+		else:
+			res[i] = X[int(pos)][i]
+	return (res)
+
+def calcFirstQuirtile(X):
+	res = np.empty(X.shape[1], dtype=float)
+	pos = X.shape[0] / 2
+
+	# vital part of searching median is sorting beforehand
+	X.sort(axis=0)
+	for i in xrange(0, X.shape[1]):
+		pos = (1.0 / 4.0) * (X.shape[0] + 1)
+		if not (pos.is_integer()):
+			res[i] = (X[int(pos) - 1][i] + X[int(pos) + 1][i]) / 2 
+		else:
+			res[i] = X[int(pos)][i]
+	return (res)
+
 
 def describe(X):
 	# function vars
@@ -59,8 +87,14 @@ def describe(X):
 	datasetMax = calcMax(X)
 	datasetStd = calcStd(X, datasetMean)
 	datasetMedian = calcMedian(X)
-
-	print(np.percentile(X, 25, axis=0))
+	datasetLastQuirtile = calcLastQuirtile(X)
+	datasetFirstQuirtile = calcFirstQuirtile(X)
+	
+	#print(np.percentile(X, 75, axis=0))
+	#print(datasetLastQuirtile)
+	#print(np.percentile(X, 25, axis=0))
+	#print(datasetFirstQuirtile)
+	
 	'''sys.stdout.write("Feature ")
 
 	for x in xrange(0, X.shape[1]):
