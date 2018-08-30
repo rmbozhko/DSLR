@@ -80,10 +80,8 @@ def 	getFeatures(dataset):
 
 	return (res)
 
-def     main(dataset):
-	global thetas
+def 	readData(dataset):
 	# reading data from a file, except header line
-	# data = np.genfromtxt(dataset, delimiter=',', skip_header=1)
 	data = np.genfromtxt(dataset, delimiter=',', skip_header=1, 
 		dtype={'names': ('Index', 'HogwartsHouse', 'FirstName', 'LastName', 'Birthday', 'BestHand', 'Arithmancy',
 						'Astronomy', 'Herbology', 'DefenseAgainstTheDarkArts', 'Divination', 'MuggleStudies',
@@ -96,6 +94,12 @@ def     main(dataset):
 	
 	X = getFeatures(data)
 	Y = getOutput(data)
+	return (X, Y)
+
+def     main(dataset):
+	global thetas
+	
+	X, Y = readData(dataset)
 	thetas = np.zeros(X.shape[1] + 1)
 
 if __name__ == '__main__':
