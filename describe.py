@@ -2,6 +2,7 @@ import numpy as np
 import sys
 import argparse
 from logreg_train import readData
+from prettytable import PrettyTable
 
 def 	calcStd(X, mean):
 	res = np.empty(X.shape[1], dtype=float)
@@ -51,65 +52,58 @@ def 	calcMedian(X):
 			res[i] = X[pos][i]
 	return (res)
 
-def calcLastQuirtile(X):
+def calcPercentile(X, quirtile):
+	# function vars
 	res = np.empty(X.shape[1], dtype=float)
-	pos = X.shape[0] / 2
+	is_integer = True
+	pos = quirtile * (X.shape[0] + 1)
 
 	# vital part of searching median is sorting beforehand
 	X.sort(axis=0)
+
+	if not (pos.is_integer()):
+		pos = int(pos)
+		is_integer = False
+
 	for i in xrange(0, X.shape[1]):
-		pos = (3.0 / 4.0) * (X.shape[0] + 1)
-		if not (pos.is_integer()):
-			res[i] = (X[int(pos) - 1][i] + X[int(pos) + 1][i]) / 2 
+		if not is_integer:
+			res[i] = (X[pos - 1][i] + X[pos + 1][i]) / 2
 		else:
-			res[i] = X[int(pos)][i]
+			res[i] = X[pos][i]
 	return (res)
 
-def calcFirstQuirtile(X):
-	res = np.empty(X.shape[1], dtype=float)
-	pos = X.shape[0] / 2
+def tabulateData(metrics, colName):
+	temp = list()
+	temp.append(colName)
 
-	# vital part of searching median is sorting beforehand
-	X.sort(axis=0)
-	for i in xrange(0, X.shape[1]):
-		pos = (1.0 / 4.0) * (X.shape[0] + 1)
-		if not (pos.is_integer()):
-			res[i] = (X[int(pos) - 1][i] + X[int(pos) + 1][i]) / 2 
-		else:
-			res[i] = X[int(pos)][i]
-	return (res)
-
+	for x in xrange(0, metrics.shape[0]):
+		temp.append(str(metrics[x]))
+	
+	return (temp)
 
 def describe(X):
-	# function vars
+	# calculating metrics
 	datasetMean = np.divide(np.sum(X, axis=0), X.shape[0])
 	datasetMin = calcMin(X)
 	datasetMax = calcMax(X)
 	datasetStd = calcStd(X, datasetMean)
 	datasetMedian = calcMedian(X)
-	datasetLastQuirtile = calcLastQuirtile(X)
-	datasetFirstQuirtile = calcFirstQuirtile(X)
-	
-	#print(np.percentile(X, 75, axis=0))
-	#print(datasetLastQuirtile)
-	#print(np.percentile(X, 25, axis=0))
-	#print(datasetFirstQuirtile)
-	
-	'''sys.stdout.write("Feature ")
+	datasetLastQuirtile = calcPercentile(X, .75)
+	datasetFirstQuirtile = calcPercentile(X, .25)
 
-	for x in xrange(0, X.shape[1]):
-		sys.stdout.write("{}\t".format(x + 1))	
+	# displaying metrics
+	t = PrettyTable(['Feature ' + str(x) if x is not 0 else '' for x in xrange(0, X.shape[1] + 1)])
 	
-	sys.stdout.write("\nCount\t")
+	t.add_row(tabulateData(np.full((X.shape[1], ), X.shape[0], dtype=int), 'Count'))
+	t.add_row(tabulateData(datasetMean, 'Mean'))
+	t.add_row(tabulateData(datasetStd, 'Std'))
+	t.add_row(tabulateData(datasetMin, 'Min'))
+	t.add_row(tabulateData(datasetFirstQuirtile, '25%'))
+	t.add_row(tabulateData(datasetMedian, '50%'))
+	t.add_row(tabulateData(datasetLastQuirtile, '75%'))
+	t.add_row(tabulateData(datasetMax, 'Max'))
+	print(t)
 	
-	for x in xrange(0, X.shape[1]):
-		sys.stdout.write("{}\t".format(X.shape[0]))
-	
-	sys.stdout.write("\nMean\t")
-
-	for x in xrange(0, X.shape[1]):
-		sys.stdout.write("{}\t".format(datasetMean[x]))'''
-
 
 def     main(dataset):
 	global thetas
