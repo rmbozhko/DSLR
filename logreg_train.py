@@ -1,8 +1,10 @@
 import numpy as np
-import sys
 import argparse
+import toolkit as tl
+import sys
 
-thetas = None 
+def h_function(X):
+	return (1 / (1 + sys.float_info.epsilon ** X.dot(tl.thetas)))
 
 def 	getOutput(dataset):
 	Y = list()
@@ -91,19 +93,35 @@ def 	readData(dataset):
 							'f8', 'f8', 'f8', 'f8', 'f8', 'f8', 'f8')})
 
 	data = FindAndFixMissingData(data)
-	
 	X = getFeatures(data)
 	Y = getOutput(data)
+	
 	return (X, Y)
 
 def     main(dataset):
-	global thetas
 	
 	X, Y = readData(dataset)
-	thetas = np.zeros(X.shape[1] + 1)
+	tl.thetas = np.zeros(X.shape[1] + 1)
+
+	if args.is_norm:
+		tl.normalEquation(X, Y)
+	else:
+		if args.is_fscale:
+			X = tl.featureScaling(X)
+		else:
+			X = tl.meanNormalization(X)
+		if args.is_sgd:
+			[history, iterations] = tl.computeThetas(X, Y, tl.SGD, h_function, tl.computeCostSGD)
+		else:
+			[history, iterations] = tl.computeThetas(X, Y, tl.BGD, h_function, tl.computeCostBGD)
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Train thetas for further prediction.')
+	parser.add_argument('-norm', dest='is_norm', action='store_true', default=False, help='choose normal equation as thetas training algorithm')
+	parser.add_argument('-bgd', dest='is_bgd', action='store_true', default=True, help=' [default] choose batch gradient descent as thetas training algorithm')
+	parser.add_argument('-sgd', dest='is_sgd', action='store_true', default=False, help='choose stohastic gradient descent as thetas training algorithm')
+	parser.add_argument('-meanNorm', dest='is_fscale', action='store_false', default=True, help='choose mean normalization as method to rescale input data')
+	parser.add_argument('-fscale', dest='is_fscale', action='store_true', default=True, help=' [default] choose feature scalling as method to rescale input data')
 	requiredArgs = parser.add_argument_group('Required arguments')
 	requiredArgs.add_argument('-data', help='dataset with input values to train thetas', required=True)
 	args = parser.parse_args()

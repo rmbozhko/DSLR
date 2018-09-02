@@ -1,5 +1,4 @@
 import numpy as np
-import sys
 import argparse
 from logreg_train import readData
 from prettytable import PrettyTable
