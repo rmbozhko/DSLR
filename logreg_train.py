@@ -2,9 +2,22 @@ import numpy as np
 import argparse
 import toolkit as tl
 import sys
+import math
+
+def computeCostLogReg(X, Y, h_function):
+	g = h_function(X)
+	J = Y.dot(math.log(g)) + (np.full((Y.shape[0], ), 1) - Y).dot(math.log(np.full((g.shape[0], ), 1) - g))
+	return (J / X.shape[0])
 
 def h_function(X):
 	return (1 / (1 + sys.float_info.epsilon ** X.dot(tl.thetas)))
+
+def 	predictOneVsAll(X, thetasStorage):
+	X = tl.addBiasUnit(X)
+	temp = X.dot(thetasStorage.T)
+
+	# selecting max value in range of predicted
+	return (np.amax(temp, axis=1))
 
 def 	getOutput(dataset):
 	Y = list()
@@ -99,7 +112,7 @@ def 	readData(dataset):
 	return (X, Y)
 
 def     main(dataset):
-	
+	faculties = {'ravenclaw' : 0,  'slytherin' : 1,  'gryffindor' : 2,  'hufflepuff' : 3}
 	X, Y = readData(dataset)
 	tl.thetas = np.zeros(X.shape[1] + 1)
 
@@ -110,10 +123,17 @@ def     main(dataset):
 			X = tl.featureScaling(X)
 		else:
 			X = tl.meanNormalization(X)
-		if args.is_sgd:
-			[history, iterations] = tl.computeThetas(X, Y, tl.SGD, h_function, tl.computeCostSGD)
-		else:
-			[history, iterations] = tl.computeThetas(X, Y, tl.BGD, h_function, tl.computeCostBGD)
+
+		thetasStorage = np.empty((len(faculties), tl.thetas.shape[0]), dtype=float)
+		for k, v in faculties.items():
+			y = np.equal(Y, np.full((Y.shape[0], ), faculties[k])).astype(int)
+			if args.is_sgd:
+				[history, iterations] = tl.computeThetas(X, y, tl.SGD, h_function, tl.computeCostSGD)
+			else:
+				[history, iterations] = tl.computeThetas(X, y, tl.BGD, h_function, tl.computeCostBGD)
+			thetasStorage[v] = tl.thetas
+	y_pred = predictOneVsAll(X, thetasStorage)
+	#print('\nTraining Set Accuracy: {}%'.format(mean(double(y_pred == Y)) * 100));
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Train thetas for further prediction.')
