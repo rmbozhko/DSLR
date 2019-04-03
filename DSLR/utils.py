@@ -62,6 +62,7 @@ def     histogram(args):
     plt.xlabel(args['xlabel'])
     plt.ylabel(args['ylabel'])
     plt.show()
-    plt.savefig('foo.png')
+    if args['-img']:
+        plt.savefig('histogram.png')
     
 
