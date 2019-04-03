@@ -1,6 +1,5 @@
 import csv
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 from prettytable import PrettyTable 
 from DSLR.math import calcMean, calcStdDev, calcMin, calcPercentile, calcMax
@@ -66,3 +65,25 @@ def     histogram(args):
         plt.savefig('histogram.png')
     
 
+def     scatter_plot(args):
+    """
+        Histogram function used to display histogram chart with homogeneous score distribution
+    """
+    
+    for i in range(len(args['legend'])):
+        x = np.array(args['data'][args['data'][:, 1] == args['legend'][i]][:, 7], dtype=np.float64)
+        y = np.array(args['data'][args['data'][:, 1] == args['legend'][i]][:, 9], dtype=np.float64)
+        #x = x[~np.isnan(x)]
+        #y = y[~np.isnan(y)]
+        print(y.shape)
+        print(x.shape)
+        print("_____________")
+        plt.scatter(x, y, color=args['color'][i], alpha=0.5)
+    
+    plt.legend(args['legend'], loc='upper right')
+    plt.title(args['title']) # is it correct title?
+    plt.xlabel(args['xlabel'])
+    plt.ylabel(args['ylabel'])
+    plt.show()
+    if args['-img']:
+        plt.savefig('scatter_plot.png')
