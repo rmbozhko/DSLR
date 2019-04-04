@@ -9,7 +9,7 @@ if __name__ == '__main__':
     dataset = load_csv('./datasets/dataset_train.csv')
 
     args['-img'] = arguments.img
-    args['data'] = dataset[1:, :]
+    args['data'] = dataset[1:, 1:]
     args['legend'] = ['Gryffindor', 'Hufflepuff', 'Ravenclaw', 'Slytherin']
     args['xlabel'] = 'Marks'
     args['ylabel'] = 'Number of student'

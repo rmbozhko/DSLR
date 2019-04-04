@@ -1,5 +1,6 @@
 import csv
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 from prettytable import PrettyTable 
 from DSLR.math import calcMean, calcStdDev, calcMin, calcPercentile, calcMax
@@ -46,44 +47,85 @@ def     describe(filename):
         t.add_column('Feature #' + str(i + 1), ['', calcMean(column), calcStdDev(column), calcMin(column), calcPercentile(column, 25), calcPercentile(column, 50), calcPercentile(column, 75), calcMax(column)])
     print(t)
 
-def     histogram(args):
+def     histogram(args, ax=None, col=15):
     """
         Histogram function used to display histogram chart with homogeneous score distribution
     """
-    
+    print(args['data'])
     for i in range(len(args['legend'])):
-        temp = np.array(args['data'][args['data'][:, 1] == args['legend'][i]][:, 16], dtype=np.float64)
+        temp = np.array(args['data'][args['data'][:, 0] == args['legend'][i]][:, col], dtype=np.float64)
         temp = temp[~np.isnan(temp)]
-        plt.hist(temp, color=args['color'][i], alpha=0.5)
+        if not ax:
+            plt.hist(temp, color=args['color'][i], alpha=0.5)
+        else:
+            ax.hist(temp, color=args['color'][i], alpha=0.5)
     
-    plt.legend(args['legend'], loc='upper right')
-    plt.title(args['title'])
-    plt.xlabel(args['xlabel'])
-    plt.ylabel(args['ylabel'])
-    plt.show()
-    if args['-img']:
-        plt.savefig('histogram.png')
+    if not ax:
+        plt.legend(args['legend'], loc='upper right')
+        plt.title(args['title'])
+        plt.xlabel(args['xlabel'])
+        plt.ylabel(args['ylabel'])
+        plt.show()
+        if args['-img']:
+            plt.savefig('histogram.png')
     
 
-def     scatter_plot(args):
+def     scatter_plot(args, ax=None, xcol=7, y=col=9):
     """
         Histogram function used to display histogram chart with homogeneous score distribution
     """
     
     for i in range(len(args['legend'])):
-        x = np.array(args['data'][args['data'][:, 1] == args['legend'][i]][:, 7], dtype=np.float64)
-        y = np.array(args['data'][args['data'][:, 1] == args['legend'][i]][:, 9], dtype=np.float64)
-        #x = x[~np.isnan(x)]
-        #y = y[~np.isnan(y)]
-        print(y.shape)
-        print(x.shape)
-        print("_____________")
-        plt.scatter(x, y, color=args['color'][i], alpha=0.5)
+        x = np.array(args['data'][args['data'][:, 0] == args['legend'][i]][:, xcol], dtype=np.float64)
+        y = np.array(args['data'][args['data'][:, 0] == args['legend'][i]][:, ycol], dtype=np.float64)
+        if not ax:
+            plt.scatter(x, y, color=args['color'][i], alpha=0.5)
+        else:
+            ax.scatter(x, y, color=args['color'][i], alpha=0.5)
     
-    plt.legend(args['legend'], loc='upper right')
-    plt.title(args['title']) # is it correct title?
-    plt.xlabel(args['xlabel'])
-    plt.ylabel(args['ylabel'])
+    if not ax:
+        plt.legend(args['legend'], loc='upper right')
+        plt.title(args['title']) # is it correct title?
+        plt.xlabel(args['xlabel'])
+        plt.ylabel(args['ylabel'])
+        plt.show()
+        if args['-img']:
+            plt.savefig('scatter_plot.png')
+
+
+def     pair_plot(args):
+    """
+        Histogram function used to display histogram chart with homogeneous score distribution
+    """
+
+    matplotlib.rc('font', **args['font'])
+    print(args['data'].shape)
+    size = args['data'].shape[1]
+    
+    _, ax = plt.subplots(nrows=size, ncols=size)
+    plt.subplots_adjust(wspace=0.15, hspace=0.15)
+    for row in range(size):
+        for col in range(size):
+            x = args['data'][:, col]
+            y = args['data'][:, row]
+
+            if col == row:
+                pair_plot(x, ax[row, col])
+            else:
+                scatter_plot(x, y, ax[row, col])
+            
+            if ax[row, col].is_last_row():
+                ax[row, col].set_xlabel(features[col].replace(' ', '\n'))
+            else:
+                ax[row, col].tick_params(labelbottom=False)
+            
+            if ax[row, col].is_first_col():
+                ax[row, col].set_ylabel(features[row].replace(' ', '\n'))
+            else:
+                ax[row, col].tick_params(labelleft=False)
+
+            ax[row, col].spines['right'].set_visible(False)
+            ax[row, col].spines['top'].set_visible(False)
+
+    plt.legend(args['legend'])
     plt.show()
-    if args['-img']:
-        plt.savefig('scatter_plot.png')
