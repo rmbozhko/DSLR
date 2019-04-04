@@ -79,7 +79,7 @@ def     scatter_plot(args, ax=None, xcol=6, ycol=8):
         if not ax:
             plt.scatter(x, y, color=args['color'][i], alpha=0.5)
         else:
-            ax.scatter(x, y, color=args['color'][i], alpha=0.5)
+            ax.scatter(x, y, color=args['color'][i], s=args['s'], alpha=0.5)
     
     if not ax:
         plt.legend(args['legend'], loc='upper right')
@@ -110,9 +110,9 @@ def     pair_plot(args):
         for col in range(size):
             
             if col == row:
-               histogram(args, ax[row, col], col)
+                histogram(args, ax[row, col], col)
             else:
-                scatter_plot(args, ax[row, col], row, col)
+                scatter_plot(args, ax[row, col], col, row)
             
             if ax[row, col].is_last_row():
                 ax[row, col].set_xlabel(args['features'][col].replace(' ', '\n'))
@@ -127,7 +127,7 @@ def     pair_plot(args):
             ax[row, col].spines['right'].set_visible(False)
             ax[row, col].spines['top'].set_visible(False)
 
-    plt.legend(args['legend'])
+    plt.legend(args['legend'], loc='center left', frameon=False, bbox_to_anchor=(1, 0.5))
     plt.show()
     if args['-img']:
         plt.savefig('pair_plot.png')

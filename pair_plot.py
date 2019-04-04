@@ -16,5 +16,6 @@ if __name__ == '__main__':
     args['title'] = 'Scatter plot'
     args['color'] = ['red', 'yellow', 'blue', 'green']
     args['font'] = {'family' : 'DejaVu Sans', 'weight' : 'light', 'size' : 7}
+    args['s'] = 1
 
     pair_plot(args)
