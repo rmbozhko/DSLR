@@ -73,7 +73,6 @@ def     scatter_plot(args, ax=None, xcol=6, ycol=8):
     """
         Histogram function used to display histogram chart with homogeneous score distribution
     """
-    print(args['data'])
     for i in range(len(args['legend'])):
         x = np.array(args['data'][args['data'][:, 0] == args['legend'][i]][:, xcol], dtype=np.float64)
         y = np.array(args['data'][args['data'][:, 0] == args['legend'][i]][:, ycol], dtype=np.float64)
@@ -96,30 +95,32 @@ def     pair_plot(args):
     """
         Histogram function used to display histogram chart with homogeneous score distribution
     """
+    
+    args['data'] = args['data'][:, 5:]
+    #print(faculties[:, None].shape)
+    #print(a.shape)
+    #print(np.concatenate((faculties[:, None], args['data'][:, :]), axis=1))
 
     matplotlib.rc('font', **args['font'])
-    print(args['data'].shape)
     size = args['data'].shape[1]
     
     _, ax = plt.subplots(nrows=size, ncols=size)
     plt.subplots_adjust(wspace=0.15, hspace=0.15)
     for row in range(size):
         for col in range(size):
-            x = args['data'][:, col]
-            y = args['data'][:, row]
-
+            
             if col == row:
-                pair_plot(x, ax[row, col])
+               histogram(args, ax[row, col], col)
             else:
-                scatter_plot(x, y, ax[row, col])
+                scatter_plot(args, ax[row, col], row, col)
             
             if ax[row, col].is_last_row():
-                ax[row, col].set_xlabel(features[col].replace(' ', '\n'))
+                ax[row, col].set_xlabel(args['features'][col].replace(' ', '\n'))
             else:
                 ax[row, col].tick_params(labelbottom=False)
             
             if ax[row, col].is_first_col():
-                ax[row, col].set_ylabel(features[row].replace(' ', '\n'))
+                ax[row, col].set_ylabel(args['features'][row].replace(' ', '\n'))
             else:
                 ax[row, col].tick_params(labelleft=False)
 
@@ -128,3 +129,5 @@ def     pair_plot(args):
 
     plt.legend(args['legend'])
     plt.show()
+    if args['-img']:
+        plt.savefig('pair_plot.png')
