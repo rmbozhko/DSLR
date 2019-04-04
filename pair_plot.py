@@ -11,9 +11,6 @@ if __name__ == '__main__':
     args['data'] = dataset[1:, 1:]
     args['features'] = dataset[0, 6:]
     args['legend'] = ['Gryffindor', 'Hufflepuff', 'Ravenclaw', 'Slytherin']
-    args['xlabel'] = dataset[0, 7]
-    args['ylabel'] = dataset[0, 9]
-    args['title'] = 'Scatter plot'
     args['color'] = ['red', 'yellow', 'blue', 'green']
     args['font'] = {'family' : 'DejaVu Sans', 'weight' : 'light', 'size' : 7}
     args['s'] = 1

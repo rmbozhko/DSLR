@@ -97,13 +97,12 @@ def     pair_plot(args):
     """
     
     args['data'] = args['data'][:, 5:]
-    #print(faculties[:, None].shape)
-    #print(a.shape)
-    #print(np.concatenate((faculties[:, None], args['data'][:, :]), axis=1))
-
-    matplotlib.rc('font', **args['font'])
     size = args['data'].shape[1]
     
+    # concatenating
+    #print(np.concatenate((faculties[:, None], args['data'][:, :]), axis=1))
+    
+    matplotlib.rc('font', **args['font'])
     _, ax = plt.subplots(nrows=size, ncols=size)
     plt.subplots_adjust(wspace=0.15, hspace=0.15)
     for row in range(size):
