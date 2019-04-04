@@ -51,7 +51,6 @@ def     histogram(args, ax=None, col=15):
     """
         Histogram function used to display histogram chart with homogeneous score distribution
     """
-    print(args['data'])
     for i in range(len(args['legend'])):
         temp = np.array(args['data'][args['data'][:, 0] == args['legend'][i]][:, col], dtype=np.float64)
         temp = temp[~np.isnan(temp)]
@@ -70,11 +69,11 @@ def     histogram(args, ax=None, col=15):
             plt.savefig('histogram.png')
     
 
-def     scatter_plot(args, ax=None, xcol=7, y=col=9):
+def     scatter_plot(args, ax=None, xcol=6, ycol=8):
     """
         Histogram function used to display histogram chart with homogeneous score distribution
     """
-    
+    print(args['data'])
     for i in range(len(args['legend'])):
         x = np.array(args['data'][args['data'][:, 0] == args['legend'][i]][:, xcol], dtype=np.float64)
         y = np.array(args['data'][args['data'][:, 0] == args['legend'][i]][:, ycol], dtype=np.float64)
