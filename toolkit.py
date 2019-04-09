@@ -3,14 +3,11 @@ import numpy as np
 thetas = None 
 
 def 	featureScaling(data):
-	max_value = np.amax(data)
+	max_value = np.amax(data, axis=0)
 	return (np.divide(data, max_value))
 
-def 	meanNormalization(data):
-	return (np.divide((data - np.mean(data)), np.std(data)))
-
 def 	computeCostSGD(X, Y, h_func):
-	J = h_funcn(X)
+	J = h_func(X)
 	J = np.sum(np.square(J - Y) / 2) / (Y.shape[0])
 	return (J)
 
@@ -18,19 +15,6 @@ def 	computeCostBGD(X, Y, h_func):
 	J = h_func(X)
 	J = np.sum(np.square(J - Y)) / (2 * Y.shape[0])
 	return (J)
-
-def		normalEquation(X, Y):
-	global thetas
-	
-	X = addBiasUnit(X)
-	print(X)
-	print(Y)
-	#X_transpose = np.transpose(X)
-	# Calculating theta
-	#thetas = np.linalg.inv(X_transpose.dot(X))
-	#thetas = thetas.dot(X_transpose)
-	#thetas = thetas.dot(Y)
-	thetas = np.array(np.linalg.pinv(X.T.dot(X)).dot(X.T).dot(Y))
 
 def 	SGD(X, Y, computeCost, h_function, learningRate=0.0001, iterationsNum=150, sorted=False):
 	global thetas
@@ -88,7 +72,7 @@ def		BGD(X, Y, computeCost, h_function, learningRate=0.0001, iterationsNum=1500)
 	return (iterations, thetasHistory)
 
 def		addBiasUnit(arr):
-	bias_arr = np.ones((arr.shape[0], 1), dtype=float)
+	bias_arr = np.ones((arr.shape[0], 1), dtype=np.float64)
 	return (np.column_stack((bias_arr, arr)))
 
 def		calcAccuracy(X, Y, logReg=True):
@@ -101,27 +85,29 @@ def		calcAccuracy(X, Y, logReg=True):
 		pred = int(np.sum(Y - X.dot(thetas)))
 	return (pred)
 
-def		computeThetas(X, y, gradDesc, h_func, computeCost):	
-	# adding bias column to X data
-	X = addBiasUnit(X)
-	
-	# cycle vars
-	diff = 1
-	prev_diff = 0
-	learningRate = 1.0
-	step = 0.1
+def		computeThetas(X, y, gradDesc, h_func, computeCost, lambda_val, num_labels):
+    global thetas
+    
+    thetas = np.zeros(X.shape[1] + 1, dtype=np.float64)
+    # adding bias column to X data
+    X = addBiasUnit(X)
+    # cycle vars
+    diff = 1
+    prev_diff = 0
+    learningRate = 1.0
+    step = 0.1
 	
 	# determing best-fitting learningRate using brute-force	
-	while abs(diff) > 0.00000001:
-		prev_diff = diff 
-		for i in range(9):
-			if diff <= 0.0001 and diff >= 0.:
-				break
-			learningRate = learningRate - step
-			[iterations, history] = gradDesc(X, y, computeCost, h_func, learningRate)
-			diff = calcAccuracy(X, y, False)
-		step = step * 0.1
-		if (diff == prev_diff):
-			break
-	print("learningRate:{}".format(learningRate))
-	return ([history, iterations])
+    while abs(diff) > 0.00000001:
+            prev_diff = diff 
+            for i in range(9):
+                if diff <= 0.0001 and diff >= 0.:
+                    break
+                learningRate = learningRate - step
+                [iterations, history] = gradDesc(X, y, computeCost, h_func, learningRate)
+                diff = calcAccuracy(X, y, False)
+            step = step * 0.1
+            if (diff == prev_diff):
+                break
+            print('learningRate:{}'.format(learningRate))
+    return ([thetas, history, iterations])

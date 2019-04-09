@@ -26,6 +26,7 @@ def		load_csv(filename):
                 dataset.append(line)
         except Exception as exc:
             print("Caught Exception in load_csv: {}".format(str(exc)))
+            exit(1)
     return np.array(dataset, dtype=object)
 
 def     describe(filename):
