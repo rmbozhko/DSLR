@@ -3,7 +3,7 @@ import argparse
 import toolkit as tl
 import sys
 import math
-from DSLR.utils import load_csv
+import pandas as pd
 
 def computeCostLogReg(X, Y, h_function):
 	g = h_function(X)
@@ -11,13 +11,8 @@ def computeCostLogReg(X, Y, h_function):
 	return -(J / X.shape[0])
 
 def     h_function(X):
-    print(X.shape)
-    print(tl.thetas.shape)
     temp = np.array(-1.0 * X.dot(tl.thetas), dtype=np.float64)
-    print(temp.shape)
-    print(type(temp))
-    print(np.exp(temp))
-    return (1 / (1 + (np.exp(temp))))
+    return (1.0 / (1.0 + (np.exp(temp))))
 
 def 	predictOneVsAll(X, thetasStorage):
 	X = tl.addBiasUnit(X)
@@ -26,12 +21,21 @@ def 	predictOneVsAll(X, thetasStorage):
 	return (np.amax(temp, axis=1))
 
 def     main(dataset):
-    dataset = load_csv('./datasets/dataset_train.csv')
+    data = pd.read_csv(dataset)
+    data = data.dropna(subset=["Defense Against the Dark Arts", "Charms", "Herbology", "Divination", "Muggle Studies"])
+    print(data.shape)
     faculties = {'Ravenclaw' : 0,  'Slytherin' : 1,  'Gryffindor' : 2,  'Hufflepuff' : 3}
-    y = dataset[1:, 1]
-    X = tl.featureScaling(dataset[1:, 6:])
+    y = np.array(data.values[:, 1], dtype=str) 
+    X = np.array(data.values[:, [8, 9, 10, 11, 17]], dtype=np.float64)
+    print(X)
+    print(y)
+    #X = tl.featureScaling(X)
+    X = tl.meanNormalization(X)
+    print(X)
     thetasStorage = np.empty((len(faculties), X.shape[1] + 1), dtype=np.float64)
+    print(thetasStorage.shape)
     lambda_val = 0.1
+    exit(0)
     for k, v in faculties.items():
         print(X)
         print(y)

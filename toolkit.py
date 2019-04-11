@@ -6,6 +6,9 @@ def 	featureScaling(data):
 	max_value = np.amax(data, axis=0)
 	return (np.divide(data, max_value))
 
+def     meanNormalization(data):
+    return (np.divide(data - np.mean(data), np.std(data)))
+
 def 	computeCostSGD(X, Y, h_func):
 	J = h_func(X)
 	J = np.sum(np.square(J - Y) / 2) / (Y.shape[0])
