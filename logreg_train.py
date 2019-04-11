@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import argparse
 import toolkit as tl
@@ -35,11 +36,20 @@ def     main(args):
         else:
             [thetas, history, iterations] = tl.computeThetas(X, (y == k).astype(int), tl.BGD, h_function, computeCostLogReg, lambda_val=lambda_val)
         thetasStorage[v] = thetas
+    
+    df = pd.DataFrame(faculties, index=[0])
+    df.to_csv('./datasets/faculties.csv', index=False, mode='w+')
+    
+    df = pd.DataFrame(thetasStorage)
+    df.to_csv('./datasets/thetas.csv', index=False, header=False, mode='w+')
+    
+    df = pd.DataFrame({"mean" : np.mean(X), "std" : np.std(X)}, columns=['mean', 'std'], index=[0])
+    df.to_csv('./datasets/metrics.csv', index=False, mode='w+')
 
     plt.plot(iterations, history)
     plt.ylabel('Function cost')
     plt.xlabel('Iterations')
-    if args.img:
+    if args.is_img:
         plt.savefig('LogRegTraining.png')
 
 if __name__ == '__main__':
