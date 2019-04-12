@@ -53,8 +53,10 @@ def     histogram(args, ax=None, col=15):
         Histogram function used to display histogram chart with homogeneous score distribution
     """
     for i in range(len(args['legend'])):
-        temp = np.array(args['data'][args['data'][:, 0] == args['legend'][i]][:, col], dtype=np.float64)
+        
+        temp = np.array(args['data'][(args['data'][:, 0] if not ax else args['faculties']) == args['legend'][i]][:, col], dtype=np.float64)
         temp = temp[~np.isnan(temp)]
+        
         if not ax:
             plt.hist(temp, color=args['color'][i], alpha=0.5)
         else:
@@ -72,11 +74,12 @@ def     histogram(args, ax=None, col=15):
 
 def     scatter_plot(args, ax=None, xcol=6, ycol=8):
     """
-        Histogram function used to display histogram chart with homogeneous score distribution
+        Scatter_plot function used to display histogram chart with homogeneous score distribution
     """
     for i in range(len(args['legend'])):
-        x = np.array(args['data'][args['data'][:, 0] == args['legend'][i]][:, xcol], dtype=np.float64)
-        y = np.array(args['data'][args['data'][:, 0] == args['legend'][i]][:, ycol], dtype=np.float64)
+        x = np.array(args['data'][(args['data'][:, 0] if not ax else args['faculties']) == args['legend'][i]][:, xcol], dtype=np.float64)
+        y = np.array(args['data'][(args['data'][:, 0] if not ax else args['faculties']) == args['legend'][i]][:, ycol], dtype=np.float64)
+            
         if not ax:
             plt.scatter(x, y, color=args['color'][i], alpha=0.5)
         else:
@@ -94,10 +97,11 @@ def     scatter_plot(args, ax=None, xcol=6, ycol=8):
 
 def     pair_plot(args):
     """
-        Histogram function used to display histogram chart with homogeneous score distribution
+        Pair_plot function used to display as well as histogram as well as scatter charts concerning features be used in log_reg training
     """
-    
+    args['faculties'] = np.array(args['data'][:, 0], dtype=str)
     args['data'] = args['data'][:, 5:]
+    #args['data'] = np.delete(args['data'], [1, 2, 3, 4], axis=1) # in case would like 
     size = args['data'].shape[1]
     
     # concatenating
@@ -105,7 +109,7 @@ def     pair_plot(args):
     
     matplotlib.rc('font', **args['font'])
     _, ax = plt.subplots(nrows=size, ncols=size)
-    plt.subplots_adjust(wspace=0.15, hspace=0.15)
+    plt.subplots_adjust(wspace=0.25, hspace=0.25)
     for row in range(size):
         for col in range(size):
             
@@ -124,10 +128,10 @@ def     pair_plot(args):
             else:
                 ax[row, col].tick_params(labelleft=False)
 
-            ax[row, col].spines['right'].set_visible(False)
-            ax[row, col].spines['top'].set_visible(False)
+            #ax[row, col].spines['right'].set_visible(False) # do we need them?
+            #ax[row, col].spines['top'].set_visible(False) # do we need them?
 
-    plt.legend(args['legend'], loc='center left', frameon=False, bbox_to_anchor=(1, 0.5))
+    plt.legend(args['legend'], loc='center left', bbox_to_anchor=(1, 0.5))
     plt.show()
     if args['-img']:
         plt.savefig('pair_plot.png')
