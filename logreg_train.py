@@ -2,8 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import argparse
 import toolkit as tl
-import sys
 import pandas as pd
+from DSLR.math import calcMean, calcStdDev
+from sklearn.metrics import accuracy_score
 
 def     computeCostLogReg(X, Y, h_function, lambda_val):
     temp_thetas = tl.thetas
@@ -27,30 +28,47 @@ def     main(args):
     faculties = {'Ravenclaw' : 0,  'Slytherin' : 1,  'Gryffindor' : 2,  'Hufflepuff' : 3}
     y = np.array(data.values[:, 1], dtype=str) 
     X = np.array(data.values[:, [8, 9, 10, 11, 17]], dtype=np.float64)
-    X = tl.meanNormalization(X)
+    #X = tl.meanNormalization(X)
+    X_train, X_test, y_train, y_test = tl.train_test_split(X, y, test_size=0.3, random_state=4)
+    sc = tl.StandardScaler()
+    sc.fit(X_train)
+
+    X_train_norm = sc.transform(X_train)
+    X_test_norm = sc.transform(X_test)
+    X = X_train_norm
+    y = y_train
+
     thetasStorage = np.empty((len(faculties), X.shape[1] + 1), dtype=np.float64)
-    lambda_val = 0.1
+    lambda_val = 10
     for k, v in faculties.items():
         if args.is_sgd:
             [thetas, history, iterations] = tl.computeThetas(X, (y == k).astype(int), tl.SGD, h_function, computeCostLogReg, lambda_val=lambda_val)
         else:
             [thetas, history, iterations] = tl.computeThetas(X, (y == k).astype(int), tl.BGD, h_function, computeCostLogReg, lambda_val=lambda_val)
         thetasStorage[v] = thetas
-    
-    df = pd.DataFrame(faculties, index=[0])
-    df.to_csv('./datasets/faculties.csv', index=False, mode='w+')
-    
-    df = pd.DataFrame(thetasStorage)
-    df.to_csv('./datasets/thetas.csv', index=False, header=False, mode='w+')
-    
-    df = pd.DataFrame({"mean" : np.mean(X), "std" : np.std(X)}, columns=['mean', 'std'], index=[0])
-    df.to_csv('./datasets/metrics.csv', index=False, mode='w+')
 
+    y_pred = tl.predict(X_test_norm, thetasStorage).tolist()
+    temp = { v:k for k, v in faculties.items() }
+    y_pred = [temp.get(item, item) for item in y_test]
+    #print("+++++++++++++++++++++")
+    #print(y_pred)
+    #print(y_test)
+    print("Missclasified samples: {}".format(sum(y_test != y_pred)))
+    print("Accuracy: %2.f" % accuracy_score(y_test, y_pred))
+    save_model(thetasStorage, faculties, sc)
     plt.plot(iterations, history)
     plt.ylabel('Function cost')
     plt.xlabel('Iterations')
     if args.is_img:
         plt.savefig('LogRegTraining.png')
+
+def     save_model(thetasStorage, faculties, sc):
+    df = pd.DataFrame(faculties, index=[0])
+    df.to_csv('./datasets/faculties.csv', index=False, mode='w+')
+    squeezed_metrics = np.column_stack((np.insert(sc._std, 0, 0.0), np.insert(sc._mean, 0, 0.0))).T
+    metrics = np.concatenate((thetasStorage, squeezed_metrics), axis=0)
+    df = pd.DataFrame(metrics)
+    df.to_csv('./datasets/weights.csv', index=False, mode='w+')
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Train thetas for further prediction.')
