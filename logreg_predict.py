@@ -13,14 +13,15 @@ def     main(args):
     X = np.array(data.values[:, [8, 9, 10, 11, 17]], dtype=np.float64)
     sc = tl.StandardScaler(metrics.values[-1, 1:], metrics.values[-2, 1:])
     X_norm = sc.transform(X)
-    temp = tl.predict(X_norm, thetas)
-    print(metrics.values[-1, 1:])
-    print(metrics.values[-2, 1:])
-    print(thetas)
+    temp = tl.predict(X_norm, thetas).tolist()
+    print("Gryffindor:{}".format(temp.count(2)))
+    print("Hufflepuff:{}".format(temp.count(3)))
+    print("Ravenclaw:{}".format(temp.count(0)))
+    print("Slytherin:{}".format(temp.count(1)))
     with open("houses.csv", 'w') as f:
         print("Index,Hogwarts House", file=f)
-        for i in temp:
-            print("{},{}".format(i, faculties.columns.values[i]), file=f)
+        for i in range(len(temp)):
+            print("{},{}".format(i, faculties.columns.values[temp[i]]), file=f)
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Train thetas for further prediction.')

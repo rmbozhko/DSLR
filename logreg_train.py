@@ -7,6 +7,9 @@ from DSLR.math import calcMean, calcStdDev
 from sklearn.metrics import accuracy_score
 
 def     computeCostLogReg(X, Y, thetas, h_function, lambda_val):
+    """
+        Computing cost of function with passed thetas
+    """
     # setting processing vars
     m = X.shape[0]
     g = h_function(X, thetas.T)
@@ -17,6 +20,9 @@ def     computeCostLogReg(X, Y, thetas, h_function, lambda_val):
     return (J)
 
 def     h_function(X, thetas):
+    """
+        Sigmoid function used with Logistic Regression to calculate the prediction values
+    """
     temp = np.array(-1.0 * X.dot(thetas), dtype=np.float64)
     return (1.0 / (1.0 + (np.exp(temp))))
 
@@ -36,11 +42,10 @@ def     main(args):
     y = y_train
 
     if args.is_sgd:
-        [thetas, history, iterations] = tl.computeThetas(X, y, tl.SGD, h_function, computeCostLogReg, faculties)
+        [thetas, costs] = tl.computeThetas(X, y, tl.SGD, h_function, computeCostLogReg, faculties)
     else:
-        [thetas, history, iterations] = tl.computeThetas(X, y, tl.BGD, h_function, computeCostLogReg, faculties)
-
-    print(history)
+        [thetas, costs] = tl.computeThetas(X, y, tl.BGD, h_function, computeCostLogReg, faculties)
+ 
     # Predicting values of the test set and displaying accuracy of trained thetas
     y_pred = tl.predict(X_test_norm, thetas).tolist()
     temp = { v:k for k, v in faculties.items() }
@@ -52,10 +57,16 @@ def     main(args):
     save_model(thetas, faculties, sc)
     
     # plotting the retrieved metrics
-    plt.plot(iterations, history)
-    plt.ylabel('Function cost')
-    plt.xlabel('Iterations')
-    if args.is_img:
+    plotting_data(range(1, len(costs) + 1), costs, 'Cost Function', 'Iterations', 'Logistic Regression -- Cost function improving', args.is_img)
+    #plotting_data(range(1, len(errors) + 1), errors, 'Missclassified entries', 'Iterations', 'Logistic Regression -- Improving missclassification examples', args.is_img)
+
+def     plotting_data(X, y, xlabel, ylabel, title, is_img=False):
+    plt.plot(X, y)
+    plt.ylabel(ylabel)
+    plt.xlabel(xlabel)
+    plt.title(title)
+    plt.show()
+    if is_img:
         plt.savefig('LogRegTraining.png')
 
 def     save_model(thetas, faculties, sc):

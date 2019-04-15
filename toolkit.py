@@ -1,17 +1,12 @@
 import numpy as np
 from DSLR.math import calcMean, calcStdDev
 
-thetas = None 
-"""
-def     meanNormalization(data):
-    return (np.divide(data - np.mean(data), np.std(data)))
-"""
-def 	SGD(X, Y, computeCost, h_function, learningRate=0.0001, iterationsNum=150, sorted=False, lambda_val=0.1):
-	global thetas
+def 	SGD(X, Y, computeCost, h_function, learningRate=0.0001, iterationsNum=150, sorted=False, lambda_val=0.1, thetas=None):
 
 	# in case, when we have only one feature in X, we can assign m to X.size,
 	# otherwise we should specify the axis of X which we are going to assign
 	m = Y.shape[0]
+	costs = list()
 
 	# Check if sorted, if so shuffle randomly whole dataset
 	# Handled both sorted datasets in ASC and DESC order
@@ -22,11 +17,7 @@ def 	SGD(X, Y, computeCost, h_function, learningRate=0.0001, iterationsNum=150, 
 	if sorted:
 		print("Sorted")
 		np.random.shuffle(X)
-	
-	# Metrics storages
-	thetasHistory = list()
-	iterations = list()
-	
+
 	for j in range(iterationsNum):
 		for i in range(X.shape[0]):
 			X_temp = np.array([X[i, :]])
@@ -34,45 +25,33 @@ def 	SGD(X, Y, computeCost, h_function, learningRate=0.0001, iterationsNum=150, 
 			J = learningRate * J
 			thetas = thetas - J
 		# Metrics collecting
-		thetasHistory.append(computeCost(X, Y, h_function, lambda_val))
+		thetasHistory.append(computeCost(X, Y, thetas, h_function, lambda_val))
 		iterations.append(j)
 
-	return (iterations, thetasHistory)
+	return (thetas, costs)
 
-def		BGD(X, Y, computeCost, h_function, learningRate=0.0001, iterationsNum=1500, lambda_val=0.1):
-    global thetas
+def		BGD(X, Y, computeCost, h_function, learningRate=0.0001, iterationsNum=1500, lambda_val=0.1, thetas=None):
     
-    # in case, when we have only one feature in X, we can assign m to X.size,
-	# otherwise we should specify the axis of X which we are going to assign
+    # Setting processing vars
+    costs = list()
+    #errors = list()
     m = Y.shape[0] 
-    temp_thetas = thetas
 
-    # Metrics storages
-    thetasHistory = list()
-    iterations = list()
-    #temp_thetas[0] = 0.0
-    print(thetas)
-    print(thetas.shape)
-    print(thetas[1:])
-    print("_____________________")
     for i in range(iterationsNum):
         #J = (h_function(X) - Y).dot(X)
         #J = np.divide(J, m)
         #J = J + ((lambda_val / m) * temp_thetas)
         #thetas = thetas - (learningRate * J)
         
-        J = h_function(X)
-        reg = (lambda_val / m) * thetas[1:]
-        #print(reg.shape)
-        #print(np.insert(reg, 0, 0))
-        #exit(0)
-        thetas = thetas - (learningRate * (1 / m) * (J - Y).dot(X) + np.insert(reg, 0, 0))
-        print("Bias Unit: {}".format(thetas[0]))
+        g = (h_function(X, thetas.T) - Y).T.dot(X)
+        reg = (lambda_val / m) * thetas[:, 1:]
+        thetas = thetas - (learningRate * (1 / m) * g + np.insert(reg, 0, 0, axis=1))
+ 
         # Metrics collecting
-        thetasHistory.append(computeCost(X, Y, h_function, lambda_val))
-        iterations.append(i)
+        costs.append(computeCost(X, Y, thetas, h_function, lambda_val))
+        #errors.append(predict(X[:, 1:], thetas))
         
-    return (iterations, thetasHistory)
+    return (thetas, costs)
 
 def train_test_split(X, y, test_size=0.3, random_state=None):
     """Split arrays or matrices into random train and test subsets
@@ -101,26 +80,42 @@ def train_test_split(X, y, test_size=0.3, random_state=None):
     return (X_train, X_test, y_train, y_test)
 
 def		addBiasUnit(arr):
-	bias_arr = np.ones((arr.shape[0], 1), dtype=np.float64)
-	return (np.column_stack((bias_arr, arr)))
+    """
+        Adding bias unit to data
+    """
+    bias_arr = np.ones((arr.shape[0], 1), dtype=np.float64)
+    return (np.column_stack((bias_arr, arr)))
 
-def     predict(X, thetas):
+def             predict(X, thetas):
+    """
+        Calculating and retriving the corresponding labels
+    """
     X = np.array(addBiasUnit(X))
     predictions = np.array(X.dot(np.array(thetas.T)))
-    temp = np.argmax(predictions, 1)
-    return (temp)
+    return (np.argmax(predictions, 1))
 
-def		computeThetas(X, y, gradDesc, h_func, computeCost, lambda_val):
-    global thetas
-    
-    thetas = np.zeros(X.shape[1] + 1, dtype=np.float64)
+def		computeThetas(X, y, gradDesc, h_func, computeCost, faculties):
+    """
+        Starting point of thetas training
+    """
+    # setting hyperparameters
     learningRate = 0.01
-    
-    # adding bias column to X data
+    lambda_val = 10
+    iterationsNum = 50
+
+    # setting training variables
     X = addBiasUnit(X)
+    thetas = np.zeros((len(faculties), X.shape[1]), dtype=np.float64)
+
+    # preparing class labels
+    y = np.tile(y.reshape((y.shape[0], 1)), 4)
+    for k, v in faculties.items():
+        mask = y[:, v] == k
+        y[:, v] = mask.astype(int)
+    y = y.astype(np.float)
     
-    [iterations, history] = gradDesc(X, y, computeCost, h_func, learningRate, lambda_val=lambda_val)
-    return ([thetas, history, iterations])
+    [thetas, costs] = gradDesc(X, y, computeCost, h_func, learningRate=learningRate, lambda_val=lambda_val, thetas=thetas, iterationsNum=iterationsNum)
+    return ([thetas, costs])
 
 class StandardScaler(object):
   """Standardize features by removing the mean and scaling to unit variance
