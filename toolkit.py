@@ -1,40 +1,39 @@
 import numpy as np
 from DSLR.math import calcMean, calcStdDev
 
-def 	SGD(X, Y, computeCost, h_function, learningRate=0.0001, iterationsNum=150, sorted=False, lambda_val=0.1, thetas=None):
+def             SGD(X, Y, computeCost, h_function, learningRate=0.0001, iterationsNum=150, sorted=False, lambda_val=0.1, thetas=None):
 
-	# in case, when we have only one feature in X, we can assign m to X.size,
-	# otherwise we should specify the axis of X which we are going to assign
-	m = Y.shape[0]
-	costs = list()
+    # in case, when we have only one feature in X, we can assign m to X.size,
+    # otherwise we should specify the axis of X which we are going to assign
+    m = Y.shape[0]
+    costs = list()
 
-	# Check if sorted, if so shuffle randomly whole dataset
-	# Handled both sorted datasets in ASC and DESC order
-	for i in range(1, X.shape[1]):
-		sorted = all(np.diff(X[:, i]) >= 0) or all(np.diff(X[:, i]) <= 0)
-		if sorted:
-			break
-	if sorted:
-		print("Sorted")
-		np.random.shuffle(X)
+    # Check if sorted, if so shuffle randomly whole dataset
+    # Handled both sorted datasets in ASC and DESC order
+    for i in range(1, X.shape[1]):
+            sorted = all(np.diff(X[:, i]) >= 0) or all(np.diff(X[:, i]) <= 0)
+            if sorted:
+                    break
+    if sorted:
+            print("Sorted")
+            np.random.shuffle(X)
 
-	for j in range(iterationsNum):
-		for i in range(X.shape[0]):
-			X_temp = np.array([X[i, :]])
-			J = (h_function(X_temp) - Y[i]).dot(X_temp)
-			J = learningRate * J
-			thetas = thetas - J
-		# Metrics collecting
-		thetasHistory.append(computeCost(X, Y, thetas, h_function, lambda_val))
-		iterations.append(j)
+    for j in range(iterationsNum):
+        for i in range(X.shape[0]):
+            X_temp = np.array([X[i, :]])
+            g = (h_function(X_temp, thetas.T) - Y[i, :]).T.dot(X_temp)
+            reg = (lambda_val / m) * thetas[:, 1:]
+            thetas = thetas - (learningRate * (1 / m) * g + np.insert(reg, 0, 0, axis=1))
+            
+        # Metrics collecting
+        costs.append(computeCost(X, Y, thetas, h_function, lambda_val))
+    
+    return (thetas, costs)
 
-	return (thetas, costs)
-
-def		BGD(X, Y, computeCost, h_function, learningRate=0.0001, iterationsNum=1500, lambda_val=0.1, thetas=None):
+def		BGD(X, Y, computeCost, h_function, learningRate=0.0001, iterationsNum=150, lambda_val=0.1, thetas=None):
     
     # Setting processing vars
     costs = list()
-    #errors = list()
     m = Y.shape[0] 
 
     for i in range(iterationsNum):
@@ -49,7 +48,6 @@ def		BGD(X, Y, computeCost, h_function, learningRate=0.0001, iterationsNum=1500,
  
         # Metrics collecting
         costs.append(computeCost(X, Y, thetas, h_function, lambda_val))
-        #errors.append(predict(X[:, 1:], thetas))
         
     return (thetas, costs)
 

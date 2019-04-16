@@ -6,6 +6,7 @@ import pandas as pd
 from DSLR.math import calcMean, calcMax, calcStdDev
 from sklearn.metrics import accuracy_score
 
+
 def     computeCostLogReg(X, Y, thetas, h_function, lambda_val):
     """
         Computing cost of function with passed thetas
