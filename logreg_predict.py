@@ -19,10 +19,10 @@ def     main(args):
     # setting and preprocessing test dataset
     data = data.fillna(method="ffill")
     X = np.array(data.values[:, [8, 9, 10, 11, 17]], dtype=np.float64)
-    #if not args.is_fscale:
-    X_norm = (X - mean) / std
-    #else:
-    #X_norm = 
+    if not args.is_fscale:
+        X_norm = (X - mean) / std
+    else:
+        X_norm = X / max
 
     # Predicting labels using thetas and writing predicted values to a file
     temp = tl.predict(X_norm, thetas).tolist()
@@ -39,6 +39,6 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Train thetas for further prediction.')
 	parser.add_argument('dataset', help='dataset with features to process', type=str)
 	parser.add_argument('weights', help='thetas and metrics used to process data and make predictions', type=str)
-	#parser.add_argument('-fScale', dest='is_fscale', action='store_true', default=False, help='switch the feature scaling as features preprocessing functions')
+	parser.add_argument('-fscale', dest='is_fscale', action='store_true', default=False, help='switch the feature scaling as features preprocessing functions')
 	args = parser.parse_args()
 	main(args)

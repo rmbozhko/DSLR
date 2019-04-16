@@ -45,9 +45,12 @@ def     main(args):
     mean = ft_get_metrics(X_train, calcMean)
     max = ft_get_metrics(X_train, calcMax)
     std = ft_get_metrics(X_train, calcStdDev)
-
-    X_train_norm = ((X_train - mean) / std)
-    X_test_norm = ((X_test - mean) / std)
+    if not args.is_fscale:
+        X_train_norm = ((X_train - mean) / std)
+        X_test_norm = ((X_test - mean) / std)
+    else:
+        X_train_norm = X_train / max
+        X_test_norm = X_test / max
     
     X = X_train_norm
     y = y_train
@@ -94,6 +97,7 @@ if __name__ == '__main__':
 	parser.add_argument('-bgd', dest='is_bgd', action='store_true', default=True, help=' [default] choose batch gradient descent as thetas training algorithm')
 	parser.add_argument('-sgd', dest='is_sgd', action='store_true', default=False, help='choose stohastic gradient descent as thetas training algorithm')
 	parser.add_argument('-img', dest='is_img', action='store_true', default=False, help='save .png image of the plot')
+	parser.add_argument('-fscale', dest='is_fscale', action='store_true', default=False, help='switch the feature scaling as features preprocessing functions')
 	parser.add_argument('dataset', help='dataset with features to process', type=str)
 	args = parser.parse_args()
 	main(args)
