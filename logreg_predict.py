@@ -4,15 +4,27 @@ import argparse
 import numpy as np
 
 def     main(args):
+
+    # reading data from sources
     data = pd.read_csv(args.dataset)
-    metrics = pd.read_csv(args.weights) 
+    metrics = pd.read_csv(args.weights)
     faculties = pd.read_csv('./datasets/faculties.csv')
 
-    thetas = metrics.values[:-2, :]
+    # setting prediction variables
+    mean = metrics.values[-1, 1:]
+    std = metrics.values[-2, 1:]
+    max = metrics.values[-3, 1:]
+    thetas = metrics.values[:-3, :]
+
+    # setting and preprocessing test dataset
     data = data.fillna(method="ffill")
     X = np.array(data.values[:, [8, 9, 10, 11, 17]], dtype=np.float64)
-    sc = tl.StandardScaler(metrics.values[-1, 1:], metrics.values[-2, 1:])
-    X_norm = sc.transform(X)
+    #if not args.is_fscale:
+    X_norm = (X - mean) / std
+    #else:
+    #X_norm = 
+
+    # Predicting labels using thetas and writing predicted values to a file
     temp = tl.predict(X_norm, thetas).tolist()
     print("Gryffindor:{}".format(temp.count(2)))
     print("Hufflepuff:{}".format(temp.count(3)))
@@ -27,5 +39,6 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Train thetas for further prediction.')
 	parser.add_argument('dataset', help='dataset with features to process', type=str)
 	parser.add_argument('weights', help='thetas and metrics used to process data and make predictions', type=str)
+	#parser.add_argument('-fScale', dest='is_fscale', action='store_true', default=False, help='switch the feature scaling as features preprocessing functions')
 	args = parser.parse_args()
 	main(args)

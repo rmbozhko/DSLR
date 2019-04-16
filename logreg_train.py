@@ -3,7 +3,7 @@ import numpy as np
 import argparse
 import toolkit as tl
 import pandas as pd
-from DSLR.math import calcMean, calcStdDev
+from DSLR.math import calcMean, calcMax, calcStdDev
 from sklearn.metrics import accuracy_score
 
 def     computeCostLogReg(X, Y, thetas, h_function, lambda_val):
@@ -26,18 +26,29 @@ def     h_function(X, thetas):
     temp = np.array(-1.0 * X.dot(thetas), dtype=np.float64)
     return (1.0 / (1.0 + (np.exp(temp))))
 
+def     ft_get_metrics(X, metricsFunc):
+    """
+        Calculating the metrics of passed dataset using metricsFunction
+    """
+    metrics = np.empty([X.shape[1]], dtype=np.float64)
+    for col in range(X.shape[1]):
+        metrics[col] = metricsFunc(X[:, col])
+    return (metrics)
+
 def     main(args):
     data = pd.read_csv(args.dataset)
     data = data.dropna(subset=["Defense Against the Dark Arts", "Charms", "Herbology", "Divination", "Muggle Studies"])
     faculties = {'Ravenclaw' : 0,  'Slytherin' : 1,  'Gryffindor' : 2,  'Hufflepuff' : 3}
     y = np.array(data.values[:, 1], dtype=str) 
     X = np.array(data.values[:, [8, 9, 10, 11, 17]], dtype=np.float64)
-    sc = tl.StandardScaler()
-    
     X_train, X_test, y_train, y_test = tl.train_test_split(X, y, test_size=0.3, random_state=4)
-    sc.fit(X_train)
-    X_train_norm = sc.transform(X_train)
-    X_test_norm = sc.transform(X_test)
+    mean = ft_get_metrics(X_train, calcMean)
+    max = ft_get_metrics(X_train, calcMax)
+    std = ft_get_metrics(X_train, calcStdDev)
+
+    X_train_norm = ((X_train - mean) / std)
+    X_test_norm = ((X_test - mean) / std)
+    
     X = X_train_norm
     y = y_train
 
@@ -54,7 +65,7 @@ def     main(args):
     print("Accuracy: %2.f" % accuracy_score(y_test, y_pred))
     
     # saving thetas and metrics to files
-    save_model(thetas, faculties, sc)
+    save_model(thetas, faculties, [mean, max, std])
     
     # plotting the retrieved metrics
     plotting_data(range(1, len(costs) + 1), costs, 'Cost Function', 'Iterations', 'Logistic Regression -- Cost function improving', args.is_img)
@@ -69,10 +80,11 @@ def     plotting_data(X, y, xlabel, ylabel, title, is_img=False):
     if is_img:
         plt.savefig('LogRegTraining.png')
 
-def     save_model(thetas, faculties, sc):
+def     save_model(thetas, faculties, metrics):
     df = pd.DataFrame(faculties, index=[0])
     df.to_csv('./datasets/faculties.csv', index=False, mode='w+')
-    squeezed_metrics = np.column_stack((np.insert(sc._std, 0, 0.0), np.insert(sc._mean, 0, 0.0))).T
+    squeezed_metrics = np.column_stack((np.insert(metrics[1], 0, 0.0), np.insert(metrics[2], 0, 0.0)))
+    squeezed_metrics = np.column_stack((squeezed_metrics, np.insert(metrics[0], 0, 0.0))).T
     metrics = np.concatenate((thetas, squeezed_metrics), axis=0)
     df = pd.DataFrame(metrics)
     df.to_csv('./datasets/weights.csv', index=False, mode='w+')
