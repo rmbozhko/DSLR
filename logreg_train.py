@@ -6,7 +6,6 @@ import pandas as pd
 from DSLR.math import calcMean, calcMax, calcStdDev
 from sklearn.metrics import accuracy_score
 
-
 def     computeCostLogReg(X, Y, thetas, h_function, lambda_val):
     """
         Computing cost of function with passed thetas
@@ -46,17 +45,22 @@ def     main(args):
     mean = ft_get_metrics(X_train, calcMean)
     max = ft_get_metrics(X_train, calcMax)
     std = ft_get_metrics(X_train, calcStdDev)
+    
     if not args.is_fscale:
         X_train_norm = ((X_train - mean) / std)
         X_test_norm = ((X_test - mean) / std)
     else:
         X_train_norm = X_train / max
         X_test_norm = X_test / max
-    
     if args.is_sgd:
         [thetas, costs] = tl.computeThetas(X_train_norm, y_train, tl.SGD, h_function, computeCostLogReg, faculties)
-    else:
+    elif args.is_mbgd:
+        [thetas, costs] = tl.computeThetas(X_train_norm, y_train, tl.MBGD, h_function, computeCostLogReg, faculties)
+    elif args.is_bgd:
         [thetas, costs] = tl.computeThetas(X_train_norm, y_train, tl.BGD, h_function, computeCostLogReg, faculties)
+    else:
+        print("No training algorithm was choosed")
+        exit(1)
  
     # Predicting values of the test set and displaying accuracy of trained thetas
     y_pred = tl.predict(X_test_norm, thetas).tolist()
@@ -79,7 +83,7 @@ def     plotting_data(X, y, xlabel, ylabel, title, is_img=False):
     plt.title(title)
     plt.show()
     if is_img:
-        plt.savefig('LogRegTraining.png')
+        plt.savefig(title + 'png')
 
 def     save_model(thetas, faculties, metrics):
     df = pd.DataFrame(faculties, index=[0])
@@ -91,11 +95,12 @@ def     save_model(thetas, faculties, metrics):
     df.to_csv('./datasets/weights.csv', index=False, mode='w+')
 
 if __name__ == '__main__':
-	parser = argparse.ArgumentParser(description='Train thetas for further prediction.')
-	parser.add_argument('-bgd', dest='is_bgd', action='store_true', default=True, help=' [default] choose batch gradient descent as thetas training algorithm')
-	parser.add_argument('-sgd', dest='is_sgd', action='store_true', default=False, help='choose stohastic gradient descent as thetas training algorithm')
-	parser.add_argument('-img', dest='is_img', action='store_true', default=False, help='save .png image of the plot')
-	parser.add_argument('-fscale', dest='is_fscale', action='store_true', default=False, help='switch the feature scaling as features preprocessing functions')
-	parser.add_argument('dataset', help='dataset with features to process', type=str)
-	args = parser.parse_args()
-	main(args)
+    parser = argparse.ArgumentParser(description='Train thetas for further prediction.')
+    parser.add_argument('-bgd', dest='is_bgd', action='store_true', default=True, help=' [default] choose batch gradient descent as thetas training algorithm')
+    parser.add_argument('-sgd', dest='is_sgd', action='store_true', default=False, help='choose stohastic gradient descent as thetas training algorithm')
+    parser.add_argument('-mbgd', dest='is_mbgd', action='store_true', default=False, help='choose mini batch gradient descent as thetas training algorithm')
+    parser.add_argument('-img', dest='is_img', action='store_true', default=False, help='save .png image of the plot')
+    parser.add_argument('-fscale', dest='is_fscale', action='store_true', default=False, help='switch the feature scaling as features preprocessing functions')
+    parser.add_argument('dataset', help='dataset with features to process', type=str)
+    args = parser.parse_args()
+    main(args)
