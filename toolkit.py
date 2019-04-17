@@ -1,6 +1,13 @@
 import numpy as np
 from DSLR.math import calcMean, calcStdDev
 
+def             next_batch(X, y, batchSize):
+    # loop over our dataset 'X' in mini-batches if size 'batchSize'
+    for i in np.arange(0, X.shape[0], batchSize):
+        # yield batches of data and labels
+        yield X[i:i + batchSize], y[i:i + batchSize]
+
+
 def             SGD(X, Y, computeCost, h_function, learningRate=0.0001, iterationsNum=150, sorted=False, lambda_val=0.1, thetas=None):
 
     # in case, when we have only one feature in X, we can assign m to X.size,
@@ -19,9 +26,8 @@ def             SGD(X, Y, computeCost, h_function, learningRate=0.0001, iteratio
             np.random.shuffle(X)
 
     for j in range(iterationsNum):
-        for i in range(X.shape[0]):
-            X_temp = np.array([X[i, :]])
-            g = (h_function(X_temp, thetas.T) - Y[i, :]).T.dot(X_temp)
+        for X, Y in next_batch(X, Y, 16):
+            g = (h_function(X, thetas.T) - Y).T.dot(X)
             reg = (lambda_val / m) * thetas[:, 1:]
             thetas = thetas - (learningRate * (1 / m) * g + np.insert(reg, 0, 0, axis=1))
             

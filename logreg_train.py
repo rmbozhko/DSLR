@@ -53,13 +53,10 @@ def     main(args):
         X_train_norm = X_train / max
         X_test_norm = X_test / max
     
-    X = X_train_norm
-    y = y_train
-
     if args.is_sgd:
-        [thetas, costs] = tl.computeThetas(X, y, tl.SGD, h_function, computeCostLogReg, faculties)
+        [thetas, costs] = tl.computeThetas(X_train_norm, y_train, tl.SGD, h_function, computeCostLogReg, faculties)
     else:
-        [thetas, costs] = tl.computeThetas(X, y, tl.BGD, h_function, computeCostLogReg, faculties)
+        [thetas, costs] = tl.computeThetas(X_train_norm, y_train, tl.BGD, h_function, computeCostLogReg, faculties)
  
     # Predicting values of the test set and displaying accuracy of trained thetas
     y_pred = tl.predict(X_test_norm, thetas).tolist()
