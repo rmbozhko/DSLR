@@ -36,6 +36,7 @@ def     ft_get_metrics(X, metricsFunc):
     return (metrics)
 
 def     main(args):
+    hyperparameters = dict()
     data = pd.read_csv(args.dataset)
     data = data.dropna(subset=["Defense Against the Dark Arts", "Charms", "Herbology", "Divination", "Muggle Studies"])
     faculties = {'Ravenclaw' : 0,  'Slytherin' : 1,  'Gryffindor' : 2,  'Hufflepuff' : 3}
@@ -45,7 +46,11 @@ def     main(args):
     mean = ft_get_metrics(X_train, calcMean)
     max = ft_get_metrics(X_train, calcMax)
     std = ft_get_metrics(X_train, calcStdDev)
-    
+    hyperparameters['iterations'] = args.iterations
+    hyperparameters['alpha'] = args.alpha
+    hyperparameters['lambda_val'] = args.lambda_val
+    hyperparameters['batch_size'] = args.batch_size
+
     if not args.is_fscale:
         X_train_norm = ((X_train - mean) / std)
         X_test_norm = ((X_test - mean) / std)
@@ -53,11 +58,9 @@ def     main(args):
         X_train_norm = X_train / max
         X_test_norm = X_test / max
     if args.is_sgd:
-        [thetas, costs] = tl.computeThetas(X_train_norm, y_train, tl.SGD, h_function, computeCostLogReg, faculties)
-    elif args.is_mbgd:
-        [thetas, costs] = tl.computeThetas(X_train_norm, y_train, tl.MBGD, h_function, computeCostLogReg, faculties)
+        [thetas, costs] = tl.computeThetas(X_train_norm, y_train, tl.SGD, h_function, computeCostLogReg, faculties, hyperparameters)
     elif args.is_bgd:
-        [thetas, costs] = tl.computeThetas(X_train_norm, y_train, tl.BGD, h_function, computeCostLogReg, faculties)
+        [thetas, costs] = tl.computeThetas(X_train_norm, y_train, tl.BGD, h_function, computeCostLogReg, faculties, hyperparameters)
     else:
         print("No training algorithm was choosed")
         exit(1)
@@ -96,9 +99,12 @@ def     save_model(thetas, faculties, metrics):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train thetas for further prediction.')
+    parser.add_argument('--lambda', dest='lambda_val', type=float, choices=np.arange(1e-6, 1e+1, 1e-3), default=10.0, help='lamda values used in regularization term', metavar="(1e-6, 1e+1)")
+    parser.add_argument('--iterations', dest='iterations', type=int, choices=range(1, 2000), default=50, help='Number of iterations we use with gradient descent', metavar="(1, 2000)")
+    parser.add_argument('--batchSize', dest='batch_size', type=int, choices=range(1, 64), default=16, help='The size of batches we split dataset to in SGD an Mini-batch gradient descent', metavar="(1, 64)")
+    parser.add_argument('--alpha', dest='alpha', type=float, choices=np.arange(1e-6, 1e+1, 1e-3), default=0.01, help='Alpha hyperparameter that we use to accelerate moving to function global minimum', metavar="(1e-6, 1e+1)")
     parser.add_argument('-bgd', dest='is_bgd', action='store_true', default=True, help=' [default] choose batch gradient descent as thetas training algorithm')
     parser.add_argument('-sgd', dest='is_sgd', action='store_true', default=False, help='choose stohastic gradient descent as thetas training algorithm')
-    parser.add_argument('-mbgd', dest='is_mbgd', action='store_true', default=False, help='choose mini batch gradient descent as thetas training algorithm')
     parser.add_argument('-img', dest='is_img', action='store_true', default=False, help='save .png image of the plot')
     parser.add_argument('-fscale', dest='is_fscale', action='store_true', default=False, help='switch the feature scaling as features preprocessing functions')
     parser.add_argument('dataset', help='dataset with features to process', type=str)

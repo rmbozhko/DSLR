@@ -132,15 +132,15 @@ def             predict(X, thetas):
     predictions = np.array(X.dot(np.array(thetas.T)))
     return (np.argmax(predictions, 1))
 
-def		computeThetas(X, y, gradDesc, h_func, computeCost, faculties):
+def		computeThetas(X, y, gradDesc, h_func, computeCost, faculties, hyperparameters):
     """
         Starting point of thetas training
     """
     # setting hyperparameters
-    learningRate = 0.01
-    lambda_val = 10
-    iterationsNum = 50
-    batchSize = 16
+    learningRate = hyperparameters['alpha']
+    lambda_val = hyperparameters['lambda_val']
+    iterationsNum = hyperparameters['iterations']
+    batchSize = hyperparameters['batch_size']
 
     # setting training variables
     X = addBiasUnit(X)
