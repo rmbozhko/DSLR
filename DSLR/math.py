@@ -1,5 +1,19 @@
 import numpy as np
 
+def 	calcVar(X):
+    """
+    Calculating the variance value of passed array
+    """
+
+    mean = calcMean(X)
+    res = 0
+    for value in X:
+        if np.isnan(value):
+            continue
+        res = res + np.square(value - mean)
+    return (np.divide(res, X.shape[0]))
+
+
 def 	calcStdDev(X):
     """
     Calculating the standard deviation value of passed array

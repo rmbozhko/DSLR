@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from prettytable import PrettyTable 
-from DSLR.math import calcMean, calcStdDev, calcMin, calcPercentile, calcMax
+from DSLR.math import calcMean, calcStdDev, calcMin, calcPercentile, calcMax, calcVar
 
 def		load_csv(filename):
     """
@@ -36,9 +36,9 @@ def     describe(filename):
     
     dataset = load_csv(filename)
     features = dataset[0]
-    data = dataset[1:, 1:] # omitting index feature
+    data = dataset[1:, :]
     t = PrettyTable()
-    t.add_column("", ['Count', 'Mean', 'Std', 'Min', '25%', '50%', '75%', 'Max'])
+    t.add_column("", ['Count', 'Mean', 'Std', 'Min', '25%', '50%', '75%', 'Max', 'Var'])
     for i in range(features.shape[0] - 1):
         try:
             column = np.array(data[:, i], dtype=float)
@@ -47,7 +47,7 @@ def     describe(filename):
         else:
             if np.all(np.isnan(column)):
                 continue
-        t.add_column('Feature #' + str(i + 1), ['', calcMean(column), calcStdDev(column), calcMin(column), calcPercentile(column, 25), calcPercentile(column, 50), calcPercentile(column, 75), calcMax(column)])
+        t.add_column(features[i], [data.shape[0], calcMean(column), calcStdDev(column), calcMin(column), calcPercentile(column, 25), calcPercentile(column, 50), calcPercentile(column, 75), calcMax(column), calcVar(column)])
     print(t)
 
 def     histogram(args, ax=None, col=15):
