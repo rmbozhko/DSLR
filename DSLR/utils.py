@@ -37,14 +37,16 @@ def     describe(filename):
     dataset = load_csv(filename)
     features = dataset[0]
     data = dataset[1:, 1:] # omitting index feature
-    t = PrettyTable()#['Feature #' + str(i + 1) for i in range(features.shape[0])])
+    t = PrettyTable()
     t.add_column("", ['Count', 'Mean', 'Std', 'Min', '25%', '50%', '75%', 'Max'])
-    # we substract one below, because Index column is not needed to be described
-    print(dataset)
     for i in range(features.shape[0] - 1):
-        column = np.array(data[:, i], dtype=float)
-        if np.all(np.isnan(column)):
+        try:
+            column = np.array(data[:, i], dtype=float)
+        except Exception:
             continue
+        else:
+            if np.all(np.isnan(column)):
+                continue
         t.add_column('Feature #' + str(i + 1), ['', calcMean(column), calcStdDev(column), calcMin(column), calcPercentile(column, 25), calcPercentile(column, 50), calcPercentile(column, 75), calcMax(column)])
     print(t)
 
