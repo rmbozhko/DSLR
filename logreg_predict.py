@@ -26,10 +26,6 @@ def     main(args):
 
     # Predicting labels using thetas and writing predicted values to a file
     temp = tl.predict(X_norm, thetas).tolist()
-    print("Gryffindor:{}".format(temp.count(2)))
-    print("Hufflepuff:{}".format(temp.count(3)))
-    print("Ravenclaw:{}".format(temp.count(0)))
-    print("Slytherin:{}".format(temp.count(1)))
     with open("houses.csv", 'w') as f:
         print("Index,Hogwarts House", file=f)
         for i in range(len(temp)):
