@@ -69,10 +69,9 @@ def     histogram(args, ax=None, col=15):
         plt.title(args['title'])
         plt.xlabel(args['xlabel'])
         plt.ylabel(args['ylabel'])
-        plt.show()
         if args['-img']:
             plt.savefig('histogram.png')
-    
+        plt.show() 
 
 def     scatter_plot(args, ax=None, xcol=6, ycol=8):
     """
@@ -92,10 +91,9 @@ def     scatter_plot(args, ax=None, xcol=6, ycol=8):
         plt.title(args['title']) # is it correct title?
         plt.xlabel(args['xlabel'])
         plt.ylabel(args['ylabel'])
-        plt.show()
         if args['-img']:
             plt.savefig('scatter_plot.png')
-
+        plt.show()
 
 def     pair_plot(args):
     """
@@ -103,12 +101,8 @@ def     pair_plot(args):
     """
     args['faculties'] = np.array(args['data'][:, 0], dtype=str)
     args['data'] = args['data'][:, 5:]
-    #args['data'] = np.delete(args['data'], [1, 2, 3, 4], axis=1) # in case would like 
     size = args['data'].shape[1]
-    
-    # concatenating
-    #print(np.concatenate((faculties[:, None], args['data'][:, :]), axis=1))
-    
+     
     matplotlib.rc('font', **args['font'])
     _, ax = plt.subplots(nrows=size, ncols=size)
     plt.subplots_adjust(wspace=0.25, hspace=0.25)
@@ -130,10 +124,7 @@ def     pair_plot(args):
             else:
                 ax[row, col].tick_params(labelleft=False)
 
-            #ax[row, col].spines['right'].set_visible(False) # do we need them?
-            #ax[row, col].spines['top'].set_visible(False) # do we need them?
-
     plt.legend(args['legend'], loc='center left', bbox_to_anchor=(1, 0.5))
-    plt.show()
     if args['-img']:
         plt.savefig('pair_plot.png')
+    plt.show()

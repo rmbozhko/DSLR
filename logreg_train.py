@@ -79,16 +79,15 @@ def     main(args):
     
     # plotting the retrieved metrics
     plotting_data(range(1, len(costs) + 1), costs, 'Iterations', 'Cost Function', 'Logistic Regression -- Cost function improving', args.is_img)
-    #plotting_data(range(1, len(errors) + 1), errors, 'Missclassified entries', 'Iterations', 'Logistic Regression -- Improving missclassification examples', args.is_img)
 
 def     plotting_data(X, y, xlabel, ylabel, title, is_img=False):
     plt.plot(X, y)
     plt.ylabel(ylabel)
     plt.xlabel(xlabel)
     plt.title(title)
-    plt.show()
     if is_img:
-        plt.savefig(title + 'png')
+        plt.savefig(title)
+    plt.show()
 
 def     save_model(thetas, faculties, metrics):
     df = pd.DataFrame(faculties, index=[0])
@@ -101,10 +100,10 @@ def     save_model(thetas, faculties, metrics):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train thetas for further prediction.')
-    parser.add_argument('--lambda', dest='lambda_val', type=float, default=10.0, help='lamda values used in regularization term')
+    parser.add_argument('--lambda', dest='lambda_val', type=float, default=10.0, help='lamda values used in regularization term', metavar="rec. (1e-6, 1e+1)")
     parser.add_argument('--iterations', dest='iterations', type=int, choices=range(1, 2000), default=50, help='Number of iterations we use with gradient descent', metavar="(1, 2000)")
     parser.add_argument('--batchSize', dest='batch_size', type=int, choices=range(1, 64), default=16, help='The size of batches we split dataset to in SGD an Mini-batch gradient descent', metavar="(1, 64)")
-    parser.add_argument('--alpha', dest='alpha', type=float, default=0.01, help='Alpha hyperparameter that we use to accelerate moving to function global minimum')
+    parser.add_argument('--alpha', dest='alpha', type=float, default=0.01, help='Alpha hyperparameter that we use to accelerate moving to function global minimum', metavar="rec. (1e-6, 1e+0)")
     parser.add_argument('-bgd', dest='is_bgd', action='store_true', default=True, help=' [default] choose batch gradient descent as thetas training algorithm')
     parser.add_argument('-sgd', dest='is_sgd', action='store_true', default=False, help='choose stohastic gradient descent as thetas training algorithm')
     parser.add_argument('-img', dest='is_img', action='store_true', default=False, help='save .png image of the plot')
